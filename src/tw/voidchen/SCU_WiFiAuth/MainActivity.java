@@ -40,10 +40,11 @@ public class MainActivity extends Activity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        SharedPreferences SetData = getSharedPreferences(SETTING_DATA, 0);
+        SharedPreferences.Editor SetDataEditor = SetData.edit();
 
         //Init MainToggle
         ToggleButton MainToggle = (ToggleButton) findViewById(R.id.MainToggle);
-        SharedPreferences SetData = getSharedPreferences(SETTING_DATA, 0);
         MainToggle.setChecked(SetData.getBoolean("MainToggleState", false));
 
         if(SetData.getBoolean("MainToggleState", false))
@@ -61,6 +62,14 @@ public class MainActivity extends Activity
             TargetText = (EditText) findViewById(R.id.TextPassword);
             TargetText.setText(SetData.getString("password", ""));
         }
+
+        //Init CheckShowNotify
+        CheckBox CheckShowNotify = (CheckBox) findViewById(R.id.CheckShowNotify);
+        CheckShowNotify.setChecked(SetData.getBoolean("ShowNotify", false));
+
+        //Init AuthFail
+        SetDataEditor.putBoolean("AuthFail", false);
+        SetDataEditor.apply();
     }
 
     @Override
@@ -97,7 +106,7 @@ public class MainActivity extends Activity
     }
 
     public void SaveConfig(View view){
-        //save username and password
+        //get username and password
         EditText TextUsername = (EditText) findViewById(R.id.TextUsername);
         EditText TextPassword = (EditText) findViewById(R.id.TextPassword);
         String username = TextUsername.getText().toString();
@@ -108,14 +117,18 @@ public class MainActivity extends Activity
             Toast.makeText(context, R.string.BlankAuthInfo, Toast.LENGTH_SHORT).show();
         }
         else{
+            //save username and password
             SharedPreferences SetData = getSharedPreferences(SETTING_DATA, 0);
             SharedPreferences.Editor SetDataEditor = SetData.edit();
             SetDataEditor.putString("username", username);
             SetDataEditor.putString("password", password);
+            SetDataEditor.putBoolean("AuthFail", false);
             SetDataEditor.apply();
 
-            Context context = getApplicationContext();
-            Toast.makeText(context, R.string.SaveAuthInfo, Toast.LENGTH_SHORT).show();
+            //save CheckShowNotify state
+            CheckBox CheckShowNotify = (CheckBox) findViewById(R.id.CheckShowNotify);
+            SetDataEditor.putBoolean("ShowNotify", CheckShowNotify.isChecked());
+            SetDataEditor.apply();
 
             //change MainToggle state
             ToggleButton MainToggle = (ToggleButton) findViewById(R.id.MainToggle);
@@ -123,6 +136,10 @@ public class MainActivity extends Activity
             MainToggle.setBackgroundDrawable(getResources().getDrawable(R.drawable.maintoggleon));
             SetDataEditor.putBoolean("MainToggleState", true);
             SetDataEditor.apply();
+
+            //Toast
+            Context context = getApplicationContext();
+            Toast.makeText(context, R.string.SaveAuthInfo, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -134,5 +151,14 @@ public class MainActivity extends Activity
             target.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         else
             target.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+    }
+
+    public void ShowNotifyClick(View view){
+        //save CheckShowNotify state
+        SharedPreferences SetData = getSharedPreferences(SETTING_DATA, 0);
+        SharedPreferences.Editor SetDataEditor = SetData.edit();
+        SetDataEditor.putBoolean("ShowNotify", ((CheckBox) view).isChecked());
+        SetDataEditor.putBoolean("AuthFail", false);
+        SetDataEditor.apply();
     }
 }

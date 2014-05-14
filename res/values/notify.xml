@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="NotifyAuthSuccess">認證成功</string>
+    <string name="NotifyAuthSuccessMsg">已完成無線網路認證</string>
+    <string name="NotifyAuthDeny">存取被拒</string>
+    <string name="NotifyAuthDenyMsg">重複認證、參數錯誤</string>
+    <string name="NotifyAuthFail">認證失敗</string>
+    <string name="NotifyAuthFailMsg">帳號或密碼錯誤</string>
+    <string name="NotifyAuthOther">認證錯誤</string>
+    <string name="NotifyAuthOtherMsg">認證過程中發生錯誤</string>
+    <string name="NotifyAuthError">連線錯誤</string>
+    <string name="NotifyAuthErrorMsg">連線過程中發生錯誤</string>
+    <string name="NotifyAuthNotActive">連線錯誤</string>
+    <string name="NotifyAuthNotActiveMsg">未啟動認證程序</string>
+</resources>

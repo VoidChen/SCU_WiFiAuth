@@ -32,12 +32,6 @@ public class WifiDetectReceiver extends BroadcastReceiver{
 
     private void AuthService(Context context){
         Intent AuthIntent = new Intent(context, AuthIntentService.class);
-
-        SharedPreferences SetData = context.getSharedPreferences(SETTING_DATA, 0);
-        AuthIntent.putExtra("username", SetData.getString("username", "NULL"));
-        AuthIntent.putExtra("password", SetData.getString("password", "NULL"));
-        AuthIntent.putExtra("Login", "");
-
         context.startService(AuthIntent);
     }
 
@@ -48,11 +42,10 @@ public class WifiDetectReceiver extends BroadcastReceiver{
             NetworkInfo networkinfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
             if(networkinfo != null){
                 if(networkinfo.getState() == NetworkInfo.State.CONNECTED){
-                    String ssid = "";
                     WifiManager wifimanager = (WifiManager) context.getSystemService(context.WIFI_SERVICE);
                     WifiInfo wifiinfo = wifimanager.getConnectionInfo();
                     if(wifiinfo != null){
-                        ssid = wifiinfo.getSSID();
+                        String ssid = wifiinfo.getSSID();
                         if(ssid.equals("\"SCU WiFi\"") || ssid.equals("\"SCU WiFi New\""))
                             AuthService(context);
                     }

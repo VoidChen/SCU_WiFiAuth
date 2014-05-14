@@ -1,27 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SCU Wifi Auth</string>
+    <string name="app_name">SCU WiFi Auth</string>
     <string name="MainToggleOn">已啟用自動認證</string>
     <string name="MainToggleOff">已停用自動認證</string>
-    <string name="BtnSave">儲存認證資訊</string>
+    <string name="BtnSave">儲存設定</string>
     <string name="TextAuthHint">請輸入認證資訊：</string>
     <string name="TextUsernameHint">帳號</string>
     <string name="TextPasswordHint">密碼</string>
     <string name="TextHelp">
         使用方法：\n
         \t\t1.輸入校內無線網路認證之帳號密碼\n
-        \t\t2.點選「儲存認證資訊」按鈕\n
+        \t\t2.點選「儲存設定」按鈕\n
         \t\t3.顯示「已啟用自動認證」代表已完成設定\n
         \t\t4.連接至校內無線網路時將自動完成認證\n
         \t\t\t\t(若顯示需認證之通知，忽略即可)\n
         \n
         無法自動認證時之問題排除：\n
         \t\t1.檢查帳號密碼是否正確\n
-        \t\t2.檢查是否已連接校內無線網路\n
-        \t\t\t\t(SCU WiFi 或 SCU WiFi New)\n
+        \t\t2.開啟「認證時顯示通知」\n
+        \t\t3.重新開啟無線網路\n
+        \t\t4.於 Google Play 回報錯誤\n
+        \t\t\t\t(連線後是否顯示通知、通知內之訊息)\n
     </string>
     <string name="CheckShowPassword">顯示密碼</string>
+    <string name="CheckShowNotify">認證時顯示通知</string>
     <string name="NeedAuthInfo">請先設定認證資訊</string>
     <string name="BlankAuthInfo">帳號或密碼不可為空白</string>
-    <string name="SaveAuthInfo">已儲存認證資訊</string>
+    <string name="SaveAuthInfo">已儲存設定</string>
 </resources>

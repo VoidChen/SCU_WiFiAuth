@@ -23,12 +23,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.DataOutputStream;
+import java.lang.Thread;
+import java.lang.InterruptedException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.net.HttpURLConnection;
 import javax.net.ssl.HttpsURLConnection;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.SharedPreferences;
+import android.content.Context;
 
 public class AuthIntentService extends IntentService{
+
+    private static final String SETTING_DATA = "PrefSetData";
+    private String errmsg = "";
 
     public AuthIntentService(){
         super("AuthIntentService");
@@ -42,6 +52,37 @@ public class AuthIntentService extends IntentService{
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    private void ShowNotify(String title, String msg, boolean rewrite, boolean redirect){
+        SharedPreferences SetData = getSharedPreferences(SETTING_DATA, 0);
+        if(SetData.getBoolean("ShowNotify", false)){
+            //get counter
+            int counter;
+            if(rewrite)
+                counter = 0;
+            else{
+                counter = SetData.getInt("notify_counter", 0);
+                SharedPreferences.Editor SetDataEditor = SetData.edit();
+                SetDataEditor.putInt("notify_counter", counter + 1);
+                SetDataEditor.apply();
+            }
+
+            //set intent
+            Intent NotifyIntent;
+            if(redirect)
+                NotifyIntent = new Intent(getApplicationContext(), MainActivity.class);
+            else
+                NotifyIntent = new Intent();
+            PendingIntent StartIntent = PendingIntent.getActivity(getApplicationContext(), counter, NotifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            //create notify
+            Notification notify = new Notification(R.drawable.icon_notify, title, System.currentTimeMillis());
+            notify.flags |= Notification.FLAG_AUTO_CANCEL;
+            notify.setLatestEventInfo(getApplicationContext(), title, msg, StartIntent);
+            NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            manager.notify(counter, notify);
+        }
     }
 
     private String readStream(InputStream res){
@@ -62,21 +103,23 @@ public class AuthIntentService extends IntentService{
         return req + URLEncoder.encode(key) + "=" + URLEncoder.encode(value); 
     }
 
-    @Override
-    protected void onHandleIntent(Intent intent){
+    private Integer AuthRequest(){
         try{
             URL url = new URL("https://wlangw-city.scu.edu.tw/auth/index.html/u");
             HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
             conn.setDoOutput(true);
             conn.setRequestMethod("POST");
             conn.setUseCaches(false);
+            conn.setFollowRedirects(false);
+            conn.setInstanceFollowRedirects(false);
 
             OutputStream reqbody = conn.getOutputStream();
 
+            SharedPreferences SetData = getSharedPreferences(SETTING_DATA, 0);
             String reqdata = "";
-            reqdata = WriteReq(reqdata, "username", intent.getStringExtra("username"));
-            reqdata = WriteReq(reqdata, "password", intent.getStringExtra("password"));
-            reqdata = WriteReq(reqdata, "Login", intent.getStringExtra("Login"));
+            reqdata = WriteReq(reqdata, "user", SetData.getString("username", "NULL"));
+            reqdata = WriteReq(reqdata, "password", SetData.getString("password", "NULL"));
+            reqdata = WriteReq(reqdata, "Login", "");
 
             reqbody.write(reqdata.getBytes());
             reqbody.flush();
@@ -86,10 +129,81 @@ public class AuthIntentService extends IntentService{
 
             InputStream res = conn.getInputStream();
             String body = readStream(res);
+
+            //auth result
+            Integer code = conn.getResponseCode();
+            Integer result = 0;
+            if(code.equals(200))
+                result = R.string.NotifyAuthSuccess;
+            else if(code.equals(302)){
+                String location = conn.getHeaderField("Location");
+                if(location.equals("?errmsg=Access denied"))
+                    result = R.string.NotifyAuthDeny;
+                else if(location.equals("/upload/custom/cp-scu/scu-portal-20140324.html?errmsg=Authentication failed"))
+                    result = R.string.NotifyAuthFail;
+                else{
+                    errmsg = "HTTP Status Code: " + code.toString();
+                    result = R.string.NotifyAuthOther;
+                }
+            }
+            else{
+                errmsg = "HTTP Status Code: " + code.toString();
+                result = R.string.NotifyAuthOther;
+            }
+
             conn.disconnect();
+            return result;
         }
         catch (IOException err){
+            errmsg = err.getMessage();
+            return R.string.NotifyAuthError;
         }
+    }
+
+    private void StartAuth(int retry){
+        Integer result = R.string.NotifyAuthNotActive;
+        int counter;
+        for(counter = 1;counter <= retry; ++counter){
+            result = AuthRequest();
+            if(result.equals(R.string.NotifyAuthSuccess)){
+                ShowNotify(getString(result), getString(R.string.NotifyAuthSuccessMsg), true, false);
+                return ;
+            }
+            else if(result.equals(R.string.NotifyAuthDeny))
+                return ;
+            else if(result.equals(R.string.NotifyAuthFail)){
+                SharedPreferences SetData = getSharedPreferences(SETTING_DATA, 0);
+                if(!SetData.getBoolean("AuthFail", false)){
+                    SharedPreferences.Editor SetDataEditor = SetData.edit();
+                    SetDataEditor.putBoolean("AuthFail", true);
+                    SetDataEditor.apply();
+                    ShowNotify(getString(result), getString(R.string.NotifyAuthFailMsg), true, true);
+                }
+                return ;
+            }
+            else if(result.equals(R.string.NotifyAuthOther)){
+            }
+            else if(result.equals(R.string.NotifyAuthError)){
+            }
+
+            //retry delay
+            if(counter != retry){
+                try{
+                    Thread.sleep(1000 * counter);
+                }
+                catch(InterruptedException err){
+                }
+            }
+        }
+        if(result.equals(R.string.NotifyAuthNotActive))
+            ShowNotify(getString(result), getString(R.string.NotifyAuthNotActiveMsg), true, true);
+        else
+            ShowNotify(getString(result), errmsg, true, true);
+    }
+
+    @Override
+    protected void onHandleIntent(Intent intent){
+        StartAuth(5);
     }
 
     @Override
