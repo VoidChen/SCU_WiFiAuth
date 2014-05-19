@@ -137,10 +137,16 @@ public class AuthIntentService extends IntentService{
                 result = R.string.NotifyAuthSuccess;
             else if(code.equals(302)){
                 String location = conn.getHeaderField("Location");
-                if(location.equals("?errmsg=Access denied"))
-                    result = R.string.NotifyAuthDeny;
-                else if(location.equals("/upload/custom/cp-scu/scu-portal-20140324.html?errmsg=Authentication failed"))
-                    result = R.string.NotifyAuthFail;
+                if(location != null){
+                    if(location.equals("?errmsg=Access denied"))
+                        result = R.string.NotifyAuthDeny;
+                    else if(location.equals("/upload/custom/cp-scu/scu-portal-20140324.html?errmsg=Authentication failed"))
+                        result = R.string.NotifyAuthFail;
+                    else{
+                        errmsg = "HTTP Status Code: " + code.toString() + " Location: " + location;
+                        result = R.string.NotifyAuthOther;
+                    }
+                }
                 else{
                     errmsg = "HTTP Status Code: " + code.toString();
                     result = R.string.NotifyAuthOther;

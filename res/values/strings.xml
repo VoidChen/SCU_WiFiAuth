@@ -4,7 +4,6 @@
     <string name="MainToggleOn">已啟用自動認證</string>
     <string name="MainToggleOff">已停用自動認證</string>
     <string name="BtnSave">儲存設定</string>
-    <string name="TextAuthHint">請輸入認證資訊：</string>
     <string name="TextUsernameHint">帳號</string>
     <string name="TextPasswordHint">密碼</string>
     <string name="TextHelp">

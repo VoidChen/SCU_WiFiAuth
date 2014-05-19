@@ -16,8 +16,8 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
             android:padding="10dp"
-            android:paddingLeft="25dp"
-            android:paddingRight="25dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
             android:textOn="@string/MainToggleOn"
             android:textOff="@string/MainToggleOff"
             android:textSize="36sp"
@@ -30,15 +30,6 @@
             android:background="#F3ED7C"
             android:onClick="MainToggleClick"
             />
-        <TextView
-            android:id="@+id/TextAuthHint"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:textSize="18sp"
-            android:text="@string/TextAuthHint"
-            />
         <EditText
             android:id="@+id/TextUsername"
             android:layout_width="fill_parent"
@@ -46,6 +37,7 @@
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:text=""
+            android:textSize="22sp"
             android:hint="@string/TextUsernameHint"
             />
         <EditText
@@ -56,24 +48,29 @@
             android:layout_marginRight="10dp"
             android:inputType="textPassword"
             android:text=""
+            android:textSize="22sp"
             android:hint="@string/TextPasswordHint"
             />
         <CheckBox android:id="@+id/CheckShowPassword"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="6dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:text="@string/CheckShowPassword"
-            android:textSize="18sp"
+            android:textSize="21sp"
             android:onClick="ShowPassword"
             />
         <CheckBox android:id="@+id/CheckShowNotify"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="8dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:text="@string/CheckShowNotify"
-            android:textSize="18sp"
+            android:textSize="21sp"
             android:onClick="ShowNotifyClick"
             />
         <Button
@@ -82,7 +79,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
-            android:textSize="20sp"
+            android:textSize="22sp"
             android:text="@string/BtnSave"
             android:onClick="SaveConfig"
             />

@@ -41,18 +41,17 @@ public class WifiDetectReceiver extends BroadcastReceiver{
         if(SetData.getBoolean("MainToggleState", false)){
             NetworkInfo networkinfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
             if(networkinfo != null){
-                if(networkinfo.getState() == NetworkInfo.State.CONNECTED){
+                String state = (networkinfo.getDetailedState()).toString();
+                if(state.equals("CONNECTED") || state.equals("CAPTIVE_PORTAL_CHECK")){
                     WifiManager wifimanager = (WifiManager) context.getSystemService(context.WIFI_SERVICE);
-                    WifiInfo wifiinfo = wifimanager.getConnectionInfo();
-                    if(wifiinfo != null){
-                        String ssid = wifiinfo.getSSID();
-                        if(ssid.equals("\"SCU WiFi\"") || ssid.equals("\"SCU WiFi New\""))
-                            AuthService(context);
+                    if(wifimanager != null){
+                        WifiInfo wifiinfo = wifimanager.getConnectionInfo();
+                        if(wifiinfo != null){
+                            String ssid = wifiinfo.getSSID();
+                            if(ssid.equals("\"SCU WiFi\"") || ssid.equals("\"SCU WiFi New\"") || ssid.equals("SCU WiFi") || ssid.equals("SCU WiFi New"))
+                                AuthService(context);
+                        }
                     }
-                }
-                else if(networkinfo.getState() == NetworkInfo.State.CONNECTING){
-                }
-                else{
                 }
             }
         }
