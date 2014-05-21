@@ -26,6 +26,7 @@ import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.net.ConnectivityManager;
 
 public class WifiDetectReceiver extends BroadcastReceiver{
     private static final String SETTING_DATA = "PrefSetData";
@@ -39,7 +40,8 @@ public class WifiDetectReceiver extends BroadcastReceiver{
     public void onReceive(Context context, Intent intent){
         SharedPreferences SetData = context.getSharedPreferences(SETTING_DATA, 0);
         if(SetData.getBoolean("MainToggleState", false)){
-            NetworkInfo networkinfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+            ConnectivityManager ConnMgr = (ConnectivityManager) context.getSystemService(context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkinfo = ConnMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
             if(networkinfo != null){
                 String state = (networkinfo.getDetailedState()).toString();
                 if(state.equals("CONNECTED") || state.equals("CAPTIVE_PORTAL_CHECK")){

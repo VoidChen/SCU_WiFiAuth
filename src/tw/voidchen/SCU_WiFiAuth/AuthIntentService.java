@@ -29,6 +29,8 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.net.HttpURLConnection;
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSession;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -103,16 +105,32 @@ public class AuthIntentService extends IntentService{
         return req + URLEncoder.encode(key) + "=" + URLEncoder.encode(value); 
     }
 
-    private Integer AuthRequest(){
+    private Integer AuthRequest(String site){
         try{
-            URL url = new URL("https://wlangw-city.scu.edu.tw/auth/index.html/u");
+            URL url = new URL(site);
             HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
             conn.setDoOutput(true);
             conn.setRequestMethod("POST");
             conn.setUseCaches(false);
             conn.setFollowRedirects(false);
             conn.setInstanceFollowRedirects(false);
+            conn.setConnectTimeout(3000);
 
+            //set CustomHostnameVerifier
+            HostnameVerifier CustomHostnameVerifier = new HostnameVerifier() {
+                @Override
+                public boolean verify(String hostname, SSLSession session) {
+                    if(hostname.equals("wlangw-city.scu.edu.tw") || hostname.equals("wlangw-main.scu.edu.tw"))
+                        return true;
+                    else{
+                        HostnameVerifier hv = HttpsURLConnection.getDefaultHostnameVerifier();
+                        return hv.verify(hostname, session);
+                    }
+                }
+            };
+            conn.setHostnameVerifier(CustomHostnameVerifier);
+
+            //set request data
             OutputStream reqbody = conn.getOutputStream();
 
             SharedPreferences SetData = getSharedPreferences(SETTING_DATA, 0);
@@ -125,8 +143,10 @@ public class AuthIntentService extends IntentService{
             reqbody.flush();
             reqbody.close();
 
+            //connect
             conn.connect();
 
+            //get response body
             InputStream res = conn.getInputStream();
             String body = readStream(res);
 
@@ -138,9 +158,9 @@ public class AuthIntentService extends IntentService{
             else if(code.equals(302)){
                 String location = conn.getHeaderField("Location");
                 if(location != null){
-                    if(location.equals("?errmsg=Access denied"))
+                    if(location.contains("?errmsg=Access denied"))
                         result = R.string.NotifyAuthDeny;
-                    else if(location.equals("/upload/custom/cp-scu/scu-portal-20140324.html?errmsg=Authentication failed"))
+                    else if(location.contains("?errmsg=Authentication failed"))
                         result = R.string.NotifyAuthFail;
                     else{
                         errmsg = "HTTP Status Code: " + code.toString() + " Location: " + location;
@@ -168,23 +188,37 @@ public class AuthIntentService extends IntentService{
 
     private void StartAuth(int retry){
         Integer result = R.string.NotifyAuthNotActive;
+        SharedPreferences SetData = getSharedPreferences(SETTING_DATA, 0);
+        SharedPreferences.Editor SetDataEditor = SetData.edit();
+        boolean flag = SetData.getBoolean("CampusFlag", true);
         int counter;
         for(counter = 1;counter <= retry; ++counter){
-            result = AuthRequest();
+            //set url
+            if(((counter&1) == 1) == flag)
+                result = AuthRequest("https://wlangw-city.scu.edu.tw/auth/index.html/u");
+            else
+                result = AuthRequest("https://wlangw-main.scu.edu.tw/auth/index.html/u");
+
+            //analysis result
             if(result.equals(R.string.NotifyAuthSuccess)){
                 ShowNotify(getString(result), getString(R.string.NotifyAuthSuccessMsg), true, false);
+                SetDataEditor.putBoolean("CampusFlag", ((counter & 1) == 1) == flag);
+                SetDataEditor.apply();
                 return ;
             }
-            else if(result.equals(R.string.NotifyAuthDeny))
+            else if(result.equals(R.string.NotifyAuthDeny)){
+                SetDataEditor.putBoolean("CampusFlag", ((counter & 1) == 1) == flag);
+                SetDataEditor.apply();
                 return ;
+            }
             else if(result.equals(R.string.NotifyAuthFail)){
-                SharedPreferences SetData = getSharedPreferences(SETTING_DATA, 0);
                 if(!SetData.getBoolean("AuthFail", false)){
-                    SharedPreferences.Editor SetDataEditor = SetData.edit();
                     SetDataEditor.putBoolean("AuthFail", true);
                     SetDataEditor.apply();
                     ShowNotify(getString(result), getString(R.string.NotifyAuthFailMsg), true, true);
                 }
+                SetDataEditor.putBoolean("CampusFlag", ((counter & 1) == 1) == flag);
+                SetDataEditor.apply();
                 return ;
             }
             else if(result.equals(R.string.NotifyAuthOther)){
