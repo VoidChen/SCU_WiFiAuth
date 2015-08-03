@@ -17,13 +17,11 @@
  */
 package tw.voidchen.SCU_WiFiAuth;
 
-import android.view.View;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.NetworkInfo;
-import android.net.NetworkInfo.State;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.ConnectivityManager;
@@ -50,8 +48,10 @@ public class WifiDetectReceiver extends BroadcastReceiver{
                         WifiInfo wifiinfo = wifimanager.getConnectionInfo();
                         if(wifiinfo != null){
                             String ssid = wifiinfo.getSSID();
-                            if(ssid.equals("\"SCU WiFi\"") || ssid.equals("\"SCU WiFi New\"") || ssid.equals("SCU WiFi") || ssid.equals("SCU WiFi New"))
-                                AuthService(context);
+                            if(ssid != null){
+                                if(ssid.equals("\"SCU WiFi\"") || ssid.equals("\"SCU WiFi New\"") || ssid.equals("SCU WiFi") || ssid.equals("SCU WiFi New"))
+                                    AuthService(context);
+                            }
                         }
                     }
                 }

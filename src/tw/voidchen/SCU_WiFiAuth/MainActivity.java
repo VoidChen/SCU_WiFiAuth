@@ -29,7 +29,6 @@ import android.content.Intent;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.InputType;
-import android.text.method.LinkMovementMethod;
 
 public class MainActivity extends Activity
 {
@@ -65,7 +64,7 @@ public class MainActivity extends Activity
 
         //Init CheckShowNotify
         CheckBox CheckShowNotify = (CheckBox) findViewById(R.id.CheckShowNotify);
-        CheckShowNotify.setChecked(SetData.getBoolean("ShowNotify", false));
+        CheckShowNotify.setChecked(SetData.getBoolean("ShowNotify", true));
 
         //Init AuthFail
         SetDataEditor.putBoolean("AuthFail", false);
@@ -105,7 +104,26 @@ public class MainActivity extends Activity
             ((ToggleButton) view).setBackgroundDrawable(getResources().getDrawable(R.drawable.maintoggleoff));
     }
 
-    public void SaveConfig(View view){
+    public void ShowPasswordClick(View view){
+        //change TextPassword inputType
+        EditText target = (EditText) findViewById(R.id.TextPassword);
+        boolean state = ((CheckBox) view).isChecked();
+        if(!state)
+            target.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        else
+            target.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+    }
+
+    public void ShowNotifyClick(View view){
+        //save CheckShowNotify state
+        SharedPreferences SetData = getSharedPreferences(SETTING_DATA, 0);
+        SharedPreferences.Editor SetDataEditor = SetData.edit();
+        SetDataEditor.putBoolean("ShowNotify", ((CheckBox) view).isChecked());
+        SetDataEditor.putBoolean("AuthFail", false);
+        SetDataEditor.apply();
+    }
+
+    public void SaveConfigClick(View view){
         //get username and password
         EditText TextUsername = (EditText) findViewById(R.id.TextUsername);
         EditText TextPassword = (EditText) findViewById(R.id.TextPassword);
@@ -141,24 +159,5 @@ public class MainActivity extends Activity
             Context context = getApplicationContext();
             Toast.makeText(context, R.string.SaveAuthInfo, Toast.LENGTH_SHORT).show();
         }
-    }
-
-    public void ShowPassword(View view){
-        //change TextPassword inputType
-        EditText target = (EditText) findViewById(R.id.TextPassword);
-        boolean state = ((CheckBox) view).isChecked();
-        if(!state)
-            target.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        else
-            target.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-    }
-
-    public void ShowNotifyClick(View view){
-        //save CheckShowNotify state
-        SharedPreferences SetData = getSharedPreferences(SETTING_DATA, 0);
-        SharedPreferences.Editor SetDataEditor = SetData.edit();
-        SetDataEditor.putBoolean("ShowNotify", ((CheckBox) view).isChecked());
-        SetDataEditor.putBoolean("AuthFail", false);
-        SetDataEditor.apply();
     }
 }

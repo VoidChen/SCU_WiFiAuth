@@ -2,8 +2,8 @@
 <resources>
     <string name="app_name">SCU WiFi Auth</string>
     <string name="MainToggleOn">已啟用自動認證</string>
-    <string name="MainToggleOff">已停用自動認證</string>
-    <string name="BtnSave">儲存設定</string>
+    <string name="MainToggleOff">未啟用自動認證</string>
+    <string name="BtnSaveConfig">儲存設定</string>
     <string name="TextUsernameHint">帳號</string>
     <string name="TextPasswordHint">密碼</string>
     <string name="TextHelp">
@@ -19,7 +19,7 @@
         \t\t2.開啟「認證時顯示通知」\n
         \t\t3.重新開啟無線網路\n
         \t\t4.於 Google Play 回報錯誤\n
-        \t\t\t\t(連線後是否顯示通知、通知內之訊息)\n
+        \t\t\t\t(所在校區、連線後是否顯示通知)\n
     </string>
     <string name="CheckShowPassword">顯示密碼</string>
     <string name="CheckShowNotify">認證時顯示通知</string>

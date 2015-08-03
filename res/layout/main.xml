@@ -60,7 +60,7 @@
             android:layout_marginRight="10dp"
             android:text="@string/CheckShowPassword"
             android:textSize="21sp"
-            android:onClick="ShowPassword"
+            android:onClick="ShowPasswordClick"
             />
         <CheckBox android:id="@+id/CheckShowNotify"
             android:layout_width="fill_parent"
@@ -74,14 +74,14 @@
             android:onClick="ShowNotifyClick"
             />
         <Button
-            android:id="@+id/BtnSave"
+            android:id="@+id/BtnSaveConfig"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:textSize="22sp"
-            android:text="@string/BtnSave"
-            android:onClick="SaveConfig"
+            android:text="@string/BtnSaveConfig"
+            android:onClick="SaveConfigClick"
             />
         <TextView
             android:id="@+id/TextHelp"
