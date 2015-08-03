@@ -21,6 +21,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Network;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -34,28 +35,35 @@ public class WifiDetectReceiver extends BroadcastReceiver{
         context.startService(AuthIntent);
     }
 
+    private boolean CheckNetworkState(Context context){
+        ConnectivityManager ConnMgr = (ConnectivityManager) context.getSystemService(context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkinfo = ConnMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        if(networkinfo != null){
+            String state = (networkinfo.getDetailedState()).toString();
+            return state.equals("CONNECTED") || state.equals("CAPTIVE_PORTAL_CHECK");
+        }
+        else
+            return false;
+    }
+
+    private boolean CheckSSID(Context context){
+        WifiManager wifimanager = (WifiManager) context.getSystemService(context.WIFI_SERVICE);
+        if(wifimanager != null){
+            WifiInfo wifiinfo = wifimanager.getConnectionInfo();
+            if(wifiinfo != null){
+                String ssid = wifiinfo.getSSID();
+                if(ssid != null)
+                    return ssid.equals("\"SCU WiFi\"") || ssid.equals("\"SCU WiFi New\"") || ssid.equals("SCU WiFi") || ssid.equals("SCU WiFi New");
+            }
+        }
+        return false;
+    }
     @Override
     public void onReceive(Context context, Intent intent){
         SharedPreferences SetData = context.getSharedPreferences(SETTING_DATA, 0);
         if(SetData.getBoolean("MainToggleState", false)){
-            ConnectivityManager ConnMgr = (ConnectivityManager) context.getSystemService(context.CONNECTIVITY_SERVICE);
-            NetworkInfo networkinfo = ConnMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-            if(networkinfo != null){
-                String state = (networkinfo.getDetailedState()).toString();
-                if(state.equals("CONNECTED") || state.equals("CAPTIVE_PORTAL_CHECK")){
-                    WifiManager wifimanager = (WifiManager) context.getSystemService(context.WIFI_SERVICE);
-                    if(wifimanager != null){
-                        WifiInfo wifiinfo = wifimanager.getConnectionInfo();
-                        if(wifiinfo != null){
-                            String ssid = wifiinfo.getSSID();
-                            if(ssid != null){
-                                if(ssid.equals("\"SCU WiFi\"") || ssid.equals("\"SCU WiFi New\"") || ssid.equals("SCU WiFi") || ssid.equals("SCU WiFi New"))
-                                    AuthService(context);
-                            }
-                        }
-                    }
-                }
-            }
+            if(CheckNetworkState(context) && CheckSSID(context))
+                AuthService(context);
         }
     }
 }

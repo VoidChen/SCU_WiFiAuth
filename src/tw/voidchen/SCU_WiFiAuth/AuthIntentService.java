@@ -17,6 +17,10 @@
  */
 package tw.voidchen.SCU_WiFiAuth;
 
+import android.os.Build;
+import android.net.Network;
+import android.net.NetworkInfo;
+import android.net.ConnectivityManager;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -225,7 +229,7 @@ public class AuthIntentService extends IntentService{
         return result;
     }
 
-    private void StartAuth(int retry){
+    private boolean StartAuth(int retry){
         Integer result = R.string.NotifyAuthNotActive;
         SharedPreferences SetData = getSharedPreferences(SETTING_DATA, 0);
         SharedPreferences.Editor SetDataEditor = SetData.edit();
@@ -245,7 +249,7 @@ public class AuthIntentService extends IntentService{
             String check = CaptivePortalCheck();
             if(check.equals("NotCaptivePortal")){
                 CancelErrorNotify();
-                break;
+                return false;
             }
             else if(check.equals("CaptivePortalVerified"))
                 result = AuthRequest("https://" + hostname + "/auth/index.html/u");
@@ -257,11 +261,11 @@ public class AuthIntentService extends IntentService{
             //analysis auth result
             if(result.equals(R.string.NotifyAuthSuccess)){
                 ShowNotify(getString(result), getString(R.string.NotifyAuthSuccessMsg), true, false);
-                break;
+                return true;
             }
             else if(result.equals(R.string.NotifyAuthDeny)){
                 CancelErrorNotify();
-                break;
+                return false;
             }
             else if(result.equals(R.string.NotifyAuthFail)){
                 if(!SetData.getBoolean("AuthFail", false)){
@@ -269,7 +273,7 @@ public class AuthIntentService extends IntentService{
                     SetDataEditor.apply();
                     ShowNotify(getString(result), getString(R.string.NotifyAuthFailMsg), true, true);
                 }
-                break;
+                return false;
             }
             else if(result.equals(R.string.NotifyAuthOther)){
             }
@@ -278,11 +282,41 @@ public class AuthIntentService extends IntentService{
         }
         if(result.equals(R.string.NotifyAuthError))
             ShowNotify(getString(result), errmsg, true, true);
+        return false;
+    }
+
+    private Network BindNetwork(){
+        Context context = getApplicationContext();
+        ConnectivityManager ConnMgr = (ConnectivityManager) context.getSystemService(context.CONNECTIVITY_SERVICE);
+        for(Network network: ConnMgr.getAllNetworks()){
+            NetworkInfo networkinfo = ConnMgr.getNetworkInfo(network);
+            if(networkinfo != null){
+                if(networkinfo.getType() == ConnectivityManager.TYPE_WIFI){
+                    ConnMgr.setProcessDefaultNetwork(network);
+                    return network;
+                }
+            }
+        }
+        return null;
+    }
+
+    private void UpdateNetwork(Network network){
+        if(network != null){
+            Context context = getApplicationContext();
+            ConnectivityManager ConnMgr = (ConnectivityManager) context.getSystemService(context.CONNECTIVITY_SERVICE);
+            ConnMgr.reportBadNetwork(network);
+        }
     }
 
     @Override
     protected void onHandleIntent(Intent intent){
-        StartAuth(5);
+        Network network = null;
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            network = BindNetwork();
+        if(StartAuth(5)){
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+                UpdateNetwork(network);
+        }
     }
 
     @Override
