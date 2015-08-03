@@ -1,6 +1,6 @@
 /*
  * SCU WiFi Auth (tw.voidchen.SCU_WiFiAuth)
- * Copyright (C) 2014 VoidChen <void.scu@gmail.com>
+ * Copyright (C) 2014-2015 VoidChen <void.scu@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
